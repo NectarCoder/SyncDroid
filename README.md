@@ -23,7 +23,9 @@ Follow the instructions in the [Prerequisites](#prerequisites) section below.
 Ensure you have Java 17 or later installed on your system. You can check this by running `java --version` in a terminal. If you do not have Java installed, you can download it from [here](https://www.oracle.com/java/technologies/downloads/).
 
 ### Starting FTP server  
-This application uses Apache FtpServer to run a local FTP server on your machine. It is included in the repo with a simple (not so secure) config to emulate the existence of a remote server. Before running the application run the following commands in a terminal (browse to project root directory first):
+This application uses Apache FtpServer to run a local FTP server on your machine. It is included in the repo with a simple (not so secure) config to emulate the existence of a remote server.  
+
+Browse to project directory and run the following commands in a terminal:
 
 ##### Windows (cmd)  
 ```bat
@@ -35,7 +37,7 @@ bin\ftpd.bat res\conf\ftpd-dev.xml
 ```bash
 cd apache-ftpserver-1.2.0/
 chmod +x bin/ftpd.sh
-sudo ./bin/ftpd.sh res/conf/ftpd-dev.xml
+./bin/ftpd.sh res/conf/ftpd-dev.xml  # You may need to run this line as sudo on Linux
 ```
 
 Now the server should be running on localhost:2121 (`127.0.0.1:2121`). Use a client like FileZilla to connect to it, username: `dev` password: `development`. The server root directory is `res/synced_folder/`, and that's where files will be synced to.  
