@@ -1,4 +1,4 @@
-package com.syncdroids.syncdroid;
+package com.syncdroids.ui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

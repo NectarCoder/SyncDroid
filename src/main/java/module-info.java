@@ -4,6 +4,6 @@ module com.syncdroids.syncdroid {
 
     requires com.dlsc.formsfx;
 
-    opens com.syncdroids.syncdroid to javafx.fxml;
-    exports com.syncdroids.syncdroid;
+    opens com.syncdroids.ui to javafx.fxml;
+    exports com.syncdroids.ui;
 }

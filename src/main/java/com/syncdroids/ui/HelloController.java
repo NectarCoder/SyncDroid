@@ -1,4 +1,4 @@
-package com.syncdroids.syncdroid;
+package com.syncdroids.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
