@@ -1,4 +1,4 @@
-package com.syncdroids.ftpengine.exception;
+package com.syncdroids.fileengine.exception;
 
 public class MissingCredentialsException extends Exception {
     public MissingCredentialsException() {

@@ -1,7 +1,7 @@
-package com.syncdroids.ftpengine;
+package com.syncdroids.fileengine;
 
-import com.syncdroids.ftpengine.exception.MissingCredentialsException;
-import com.syncdroids.ftpengine.exception.ServerUninitializedException;
+import com.syncdroids.fileengine.exception.MissingCredentialsException;
+import com.syncdroids.fileengine.exception.ServerUninitializedException;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.*;
 import java.io.IOException;
