@@ -1,6 +1,6 @@
 # SyncDroid  
 
-SyncDroid is a GUI desktop, cross-platform application for synchronizing files and folders to a server. It is written in Java and the JavaFX framework for the GUI. 
+SyncDroid is a GUI desktop, cross-platform application for synchronizing files and folders to a server. It is written in Java and utilizes the JavaFX framework for the GUI. 
 
 Note: This project is developed with IntelliJ IDEA.
 
