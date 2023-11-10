@@ -44,7 +44,6 @@ public class DirectoryParser {
 
     /**
      * Prints the FileTree contents as a readable list of file hierarchy.
-     *
      */
     public static void printDirectoryTree(FileTree ft) {
         System.out.format("%" + "s%s\n", "", ft.getFile().getName());

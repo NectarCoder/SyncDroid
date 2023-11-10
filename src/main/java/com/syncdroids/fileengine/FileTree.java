@@ -12,13 +12,13 @@ public class FileTree {
         return children;
     }
 
+    public File getFile() {
+        return file;
+    }
+
     public FileTree(File file) {
         this.file = file;
         this.children = new ArrayList<>();
-    }
-
-    public File getFile() {
-        return file;
     }
 
 
