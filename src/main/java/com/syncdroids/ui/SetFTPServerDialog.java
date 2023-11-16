@@ -4,7 +4,6 @@ package com.syncdroids.ui;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
@@ -14,13 +13,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 public class SetFTPServerDialog {
 
@@ -48,10 +40,10 @@ public class SetFTPServerDialog {
     public TextField successField;
 
     // File to store login information
-    File file = new File("data.txt");
+    final File file = new File("data.txt");
 
     // HashMap to store login information
-    HashMap<String, String> loginInfo = new HashMap<>();
+    final HashMap<String, String> loginInfo = new HashMap<>();
 
     @FXML
     void changeVisibility(ActionEvent event) {
@@ -84,7 +76,7 @@ public class SetFTPServerDialog {
     }
 
     @FXML
-    void createAccount(ActionEvent event) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    void createAccount(ActionEvent event) throws IOException {
         // Create a new user account
         writeToFile();
         successField.setVisible(true);
@@ -117,7 +109,7 @@ public class SetFTPServerDialog {
         scanner.close();
     }
 
-    private void writeToFile() throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+    private void writeToFile() throws IOException {
         // Write a new user account to the file
         String username = usernameTextField.getText();
         String password = getPassword();

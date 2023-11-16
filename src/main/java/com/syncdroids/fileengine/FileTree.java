@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileTree {
+public class FileTree implements Comparable<FileTree> {
     private final File file;
     private final List<FileTree> children;
 
@@ -21,5 +21,8 @@ public class FileTree {
         this.children = new ArrayList<>();
     }
 
-
+    @Override
+    public int compareTo(FileTree ft) {
+        return 0;
+    }
 }

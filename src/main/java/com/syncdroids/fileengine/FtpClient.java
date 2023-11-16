@@ -17,7 +17,6 @@ public class FtpClient {
 
     /**
      * Initializes a new FtpClient object.
-     *
      * Before using this class, set the server address and credentials with the setServerAddress() and setCredentials() methods.
      */
     public FtpClient() {
@@ -30,8 +29,8 @@ public class FtpClient {
 
     /**
      * Set server IP and port number.
-     * @param serverIp
-     * @param portNumber
+     * @param serverIp IP of the server.
+     * @param portNumber Server's IP port number.
      */
     public void setServerAddress(String serverIp, Integer portNumber) {
         this.serverip = serverIp;

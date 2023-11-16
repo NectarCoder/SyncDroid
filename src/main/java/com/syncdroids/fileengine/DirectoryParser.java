@@ -3,8 +3,6 @@ package com.syncdroids.fileengine;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.NotDirectoryException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DirectoryParser {
 

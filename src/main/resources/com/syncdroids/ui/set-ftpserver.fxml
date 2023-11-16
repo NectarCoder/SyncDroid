@@ -13,53 +13,56 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<DialogPane prefWidth="350.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.syncdroids.ui.SetFTPServerDialog">
+<DialogPane prefWidth="350.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.syncdroids.ui.SetFTPServerDialog">
 
     <content>
         <VBox prefWidth="385.0" spacing="5">
             <GridPane hgap="5" vgap="5">
-                <Label text="Server IP:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <TextField fx:id="serverIpTextField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Server IP:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="serverIpTextField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-                <Label text="Port Number:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <TextField fx:id="portTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Port Number:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="portTextField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-                <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <TextField fx:id="usernameTextField" prefHeight="25.0" prefWidth="405.0" GridPane.columnIndex="1" GridPane.fillWidth="false" GridPane.rowIndex="2" />
+                <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="usernameTextField" prefHeight="25.0" prefWidth="405.0" GridPane.columnIndex="1"
+                           GridPane.fillWidth="false" GridPane.rowIndex="2"/>
 
-                                  <Label prefHeight="17.0" prefWidth="185.0" text="Password:" GridPane.rowIndex="3" />
-            <StackPane prefHeight="0.0" prefWidth="217.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-               <children>
-                  <TextField fx:id="passwordTextField" />
-                  <PasswordField fx:id="hiddenPasswordTextField" />
-                  <CheckBox fx:id="showPassword" mnemonicParsing="false" onAction="#changeVisibility" translateX="95.0" />
-               </children>
-            </StackPane>
+                <Label prefHeight="17.0" prefWidth="185.0" text="Password:" GridPane.rowIndex="3"/>
+                <StackPane prefHeight="0.0" prefWidth="217.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                    <TextField fx:id="passwordTextField"/>
+                    <PasswordField fx:id="hiddenPasswordTextField"/>
+                    <CheckBox fx:id="showPassword" mnemonicParsing="false" onAction="#changeVisibility"
+                              translateX="95.0"/>
+                </StackPane>
 
                 <columnConstraints>
-                    <ColumnConstraints maxWidth="182.0" minWidth="108.0" prefWidth="108.0" />
-                    <ColumnConstraints hgrow="ALWAYS" maxWidth="217.0" minWidth="143.0" prefWidth="217.0" />
+                    <ColumnConstraints maxWidth="182.0" minWidth="108.0" prefWidth="108.0"/>
+                    <ColumnConstraints hgrow="ALWAYS" maxWidth="217.0" minWidth="143.0" prefWidth="217.0"/>
                 </columnConstraints>
-            <rowConstraints>
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-            </rowConstraints>
+                <rowConstraints>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                </rowConstraints>
             </GridPane>
-            <Button mnemonicParsing="false" onAction="#createAccount" prefHeight="25.0" prefWidth="334.0" text="Create Account" />
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#loginHandler" prefHeight="25.0" prefWidth="377.0" text="Login" />
+            <Button mnemonicParsing="false" onAction="#createAccount" prefHeight="25.0" prefWidth="334.0"
+                    text="Create Account"/>
+            <Button alignment="CENTER" mnemonicParsing="false" onAction="#loginHandler" prefHeight="25.0"
+                    prefWidth="377.0" text="Login"/>
         </VBox>
     </content>
-   <buttonTypes>
-      <ButtonType fx:constant="CLOSE" />
-   </buttonTypes>
-   <header>
-      <StackPane prefHeight="28.0" prefWidth="350.0">
-         <children>
-            <TextField fx:id="errorField" alignment="CENTER_RIGHT" prefWidth="56.0" style="-fx-background-color: #ffc1bd; -fx-border-width: 2; -fx-border-style: solid; -fx-border-color: #e60000; -fx-border-radius: 4; -fx-alignment: center-left;" text="ERROR" visible="false" />
-            <TextField fx:id="successField" style="-fx-background-color: #d0ffbd; -fx-border-width: 2; -fx-border-style: solid; -fx-border-color: #0fe600; -fx-border-radius: 4; -fx-alignment: center-left;" text="SUCCESS" visible="false" />
-         </children>
-      </StackPane>
-   </header>
+    <header>
+        <StackPane prefHeight="28.0" prefWidth="350.0">
+            <TextField fx:id="errorField" alignment="CENTER_RIGHT" prefWidth="56.0"
+                       style="-fx-background-color: #ffc1bd; -fx-border-width: 2; -fx-border-style: solid; -fx-border-color: #e60000; -fx-border-radius: 4; -fx-alignment: center-left;"
+                       text="ERROR" visible="false"/>
+            <TextField fx:id="successField"
+                       style="-fx-background-color: #d0ffbd; -fx-border-width: 2; -fx-border-style: solid; -fx-border-color: #0fe600; -fx-border-radius: 4; -fx-alignment: center-left;"
+                       text="SUCCESS" visible="false"/>
+        </StackPane>
+    </header>
+    <ButtonType fx:constant="CLOSE"/>
 </DialogPane>

@@ -4,6 +4,7 @@ package com.syncdroids.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Dialog;
 import javafx.stage.Modality;
@@ -11,7 +12,11 @@ import java.io.IOException;
 
 public class HelloController {
 
+    @FXML
     public MenuItem exit;
+
+    @FXML
+    public MenuBar getPrimaryStage;
 
     @FXML
     protected void exitProgram() {
