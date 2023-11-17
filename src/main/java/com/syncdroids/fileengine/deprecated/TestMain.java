@@ -1,10 +1,11 @@
-package com.syncdroids.fileengine;
+package com.syncdroids.fileengine.deprecated;
 
 import java.io.FileNotFoundException;
 import java.nio.file.NotDirectoryException;
 
-import static com.syncdroids.fileengine.DirectoryParser.*;
+import static com.syncdroids.fileengine.deprecated.DirectoryParser.*;
 
+@Deprecated
 public class TestMain {
 
     public static void main(String[] args){

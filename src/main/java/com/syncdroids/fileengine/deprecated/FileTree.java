@@ -1,9 +1,10 @@
-package com.syncdroids.fileengine;
+package com.syncdroids.fileengine.deprecated;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class FileTree implements Comparable<FileTree> {
     private final File file;
     private final List<FileTree> children;
@@ -23,6 +24,10 @@ public class FileTree implements Comparable<FileTree> {
 
     @Override
     public int compareTo(FileTree ft) {
+
+
+
+
         return 0;
     }
 }
