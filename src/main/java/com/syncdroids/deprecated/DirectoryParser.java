@@ -1,4 +1,4 @@
-package com.syncdroids.fileengine.deprecated;
+package com.syncdroids.deprecated;
 
 import java.io.File;
 import java.io.FileNotFoundException;
