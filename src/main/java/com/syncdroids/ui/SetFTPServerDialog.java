@@ -1,23 +1,43 @@
 // SetFTPServerDialog.java
 package com.syncdroids.ui;
 
-import javafx.event.ActionEvent;
+import com.syncdroids.fileengine.FtpClient;
+import com.syncdroids.fileengine.exception.MissingCredentialsException;
+import com.syncdroids.fileengine.exception.ServerUninitializedException;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.event.ActionEvent;
+
+import javafx.scene.text.Font;
 
 import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class SetFTPServerDialog {
 
     @FXML
+    private FtpClient ftpClient = new FtpClient();
+
+    @FXML
     private void exitProgram() {
+        // Disconnect from FTP server before exiting the program
+        try {
+            ftpClient.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle disconnection exceptions appropriately
+        }
+
         // Exit the program
         System.exit(0);
     }
@@ -69,24 +89,69 @@ public class SetFTPServerDialog {
         String storedPassword = loginInfo.get(username);
         if (password.equals(storedPassword)) {
             System.out.println("Successfully login!");
+
+            // Connect to FTP server after successful login
+            ftpClient.setServerAddress(serverIpTextField.getText(), Integer.parseInt(portTextField.getText()));
+            ftpClient.setCredentials(username, password);
+
+            try {
+                ftpClient.connect();
+                // Perform FTP operations if needed
+            } catch (ServerUninitializedException | MissingCredentialsException e) {
+                e.printStackTrace();
+                // Handle exceptions appropriately
+            }
+
             successField.setVisible(true);
         } else {
+            errorField.setText("Wrong Password");
+            errorField.setFont(new Font("Serif Bold", 12));
             errorField.setVisible(true);
         }
     }
 
     @FXML
     void createAccount(ActionEvent event) throws IOException {
+
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line = reader.readLine();
+        while (line != null) {
+            String[] User = line.split(",",2);
+            if (usernameTextField.getText().equals(User[0])) {
+                System.out.println(User[0] + " already exists.");
+                errorField.setFont(new Font("Serif Bold", 12));
+                errorField.setText("User already exists");
+                errorField.setVisible(true);
+                return;
+            }
+                line = reader.readLine();
+        }
         // Create a new user account
         writeToFile();
+
+        // Connect to FTP server after creating an account
+        ftpClient.setServerAddress(serverIpTextField.getText(), Integer.parseInt(portTextField.getText()));
+        ftpClient.setCredentials(usernameTextField.getText(), getPassword());
+
+        try {
+            ftpClient.connect();
+            // Perform FTP operations if needed
+        } catch (ServerUninitializedException | MissingCredentialsException e) {
+            e.printStackTrace();
+            // Handle exceptions appropriately
+        }
+
         successField.setVisible(true);
+
+
     }
 
     private String getPassword() {
         // Get the visible or hidden password based on visibility
-        if (passwordTextField.isVisible()) {
+        if (showPassword.isSelected()) {
             return passwordTextField.getText();
         } else {
+            System.out.println(hiddenPasswordTextField.getText());
             return hiddenPasswordTextField.getText();
         }
     }
@@ -114,7 +179,7 @@ public class SetFTPServerDialog {
         String username = usernameTextField.getText();
         String password = getPassword();
         BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-
+        System.out.println(username+password);
         writer.write(username + "," + password + "\n");
         writer.close();
     }
