@@ -5,13 +5,15 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class FileNode implements Comparable<FileNode> {
+public class FileNode {
 
     private boolean isDirectory;
     private List<FileNode> children = null;
@@ -71,6 +73,7 @@ public class FileNode implements Comparable<FileNode> {
             for (File child : childrenFiles) {
                 children.add(new FileNode(child.getPath()));
             }
+            Arrays.sort(childrenFiles);
 
             return true;
         }
@@ -94,6 +97,50 @@ public class FileNode implements Comparable<FileNode> {
         return this.childCount;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        // Input must be of type FileNode
+        if (o.getClass() != FileNode.class) {
+            return false;
+        }
+
+        //Cast input to a FileNode object
+        FileNode other = (FileNode) o;
+
+        // Check if both are directories
+        if (this.isDirectory && other.isDirectory()) {
+            // Check the number of children, if not equal, false
+            if (this.childCount != other.getChildCount()) {
+                return false;
+            } else if (!this.currentFile.getName().equals(other.getFile().getName())) { // Directory names should be same
+                return false;
+            } else { // Compare every child with each other
+                for (int i = 0; i < this.childCount; i++) {
+                    if (!this.children.get(i).equals(other.children.get(i))) {
+                        return false;
+                    }
+                }
+            }
+            // If both are NOT directories, i.e. they are files
+        } else if (!(this.isDirectory) && !(other.isDirectory())) {
+            if (!this.currentFile.getName().equals(other.getFile().getName())) {
+                return false;
+            }
+            try {
+                return FileUtils.contentEqualsIgnoreEOL(this.currentFile, other.getFile(), null);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            // Return false if one is a directory and another is a file (not comparable!)
+            return false;
+        }
+
+        return true;
+    }
+
+    /*
     @Override
     public int compareTo(FileNode other) {
 
@@ -144,4 +191,5 @@ public class FileNode implements Comparable<FileNode> {
 
         return 0;
     }
+     */
 }
