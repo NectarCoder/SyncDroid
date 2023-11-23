@@ -1,9 +1,9 @@
-package com.syncdroids.fileengine.deprecated;
+package com.syncdroids.deprecated;
 
 import java.io.FileNotFoundException;
 import java.nio.file.NotDirectoryException;
 
-import static com.syncdroids.fileengine.deprecated.DirectoryParser.*;
+import static com.syncdroids.deprecated.DirectoryParser.*;
 
 @Deprecated
 public class TestMain {
