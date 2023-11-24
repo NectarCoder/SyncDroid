@@ -60,6 +60,13 @@ public class FtpClient {
         close();
     }
 
+    public FTPClient getFTPClientSessionObject(){
+        if(this.ftpClient == null) {
+            throw new NullPointerException();
+        }
+        return this.ftpClient;
+    }
+
     private void open() throws IOException {
         ftpClient = new FTPClient();
         ftpClient.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
