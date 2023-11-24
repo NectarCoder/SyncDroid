@@ -48,10 +48,8 @@
                     <RowConstraints/>
                 </rowConstraints>
             </GridPane>
-            <Button mnemonicParsing="false" onAction="#createAccount" prefHeight="25.0" prefWidth="334.0"
-                    text="Create Account"/>
             <Button alignment="CENTER" mnemonicParsing="false" onAction="#loginHandler" prefHeight="25.0"
-                    prefWidth="377.0" text="Login"/>
+                    prefWidth="377.0" text="Connect"/>
         </VBox>
     </content>
     <header>

@@ -111,6 +111,7 @@ public class SetFTPServerDialog {
     }
 
     @FXML
+
     void createAccount(ActionEvent event) throws IOException {
 
         BufferedReader reader = new BufferedReader(new FileReader(file));
