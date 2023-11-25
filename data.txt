@@ -1,4 +1,1 @@
-Quadyfish,password
-Banana,password
-Strawberry,password
 dev,development

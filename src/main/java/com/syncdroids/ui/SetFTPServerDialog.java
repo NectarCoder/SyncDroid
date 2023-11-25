@@ -4,43 +4,23 @@ package com.syncdroids.ui;
 import com.syncdroids.fileengine.FtpClient;
 import com.syncdroids.fileengine.exception.MissingCredentialsException;
 import com.syncdroids.fileengine.exception.ServerUninitializedException;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.event.ActionEvent;
-
 import javafx.scene.text.Font;
-
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.HashMap;
 import java.util.Scanner;
 
+
 public class SetFTPServerDialog {
-
-    @FXML
-    private FtpClient ftpClient = new FtpClient();
-
-    @FXML
-    private void exitProgram() {
-        // Disconnect from FTP server before exiting the program
-        try {
-            ftpClient.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Handle disconnection exceptions appropriately
-        }
-
-        // Exit the program
-        System.exit(0);
-    }
 
     @FXML
     public TextField passwordTextField;
@@ -64,6 +44,20 @@ public class SetFTPServerDialog {
 
     // HashMap to store login information
     final HashMap<String, String> loginInfo = new HashMap<>();
+
+    @FXML
+    private FtpClient ftpClient = new FtpClient();
+
+    @FXML
+    private void closeConnection() {
+        // Disconnect from FTP server before exiting the program
+        try {
+            ftpClient.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle disconnection exceptions appropriately
+        }
+    }
 
     @FXML
     void changeVisibility(ActionEvent event) {
@@ -110,6 +104,35 @@ public class SetFTPServerDialog {
         }
     }
 
+    private String getPassword() {
+        // Get the visible or hidden password based on visibility
+        if (showPassword.isSelected()) {
+            return passwordTextField.getText();
+        } else {
+            System.out.println(hiddenPasswordTextField.getText());
+            return hiddenPasswordTextField.getText();
+        }
+    }
+
+    private void updateUsernamesAndPasswords() throws IOException {
+        // Update the HashMap with login information from the file
+        Scanner scanner = new Scanner(file);
+        loginInfo.clear();
+
+        while (scanner.hasNext()) {
+            String[] splitInfo = scanner.nextLine().split(",");
+
+            if (splitInfo.length >= 2) {
+                loginInfo.put(splitInfo[0], splitInfo[1]);
+            } else {
+                System.err.println("Invalid data format in the file.");
+            }
+        }
+
+        scanner.close();
+    }
+
+    /*
     @FXML
 
     void createAccount(ActionEvent event) throws IOException {
@@ -146,35 +169,6 @@ public class SetFTPServerDialog {
 
 
     }
-
-    private String getPassword() {
-        // Get the visible or hidden password based on visibility
-        if (showPassword.isSelected()) {
-            return passwordTextField.getText();
-        } else {
-            System.out.println(hiddenPasswordTextField.getText());
-            return hiddenPasswordTextField.getText();
-        }
-    }
-
-    private void updateUsernamesAndPasswords() throws IOException {
-        // Update the HashMap with login information from the file
-        Scanner scanner = new Scanner(file);
-        loginInfo.clear();
-
-        while (scanner.hasNext()) {
-            String[] splitInfo = scanner.nextLine().split(",");
-
-            if (splitInfo.length >= 2) {
-                loginInfo.put(splitInfo[0], splitInfo[1]);
-            } else {
-                System.err.println("Invalid data format in the file.");
-            }
-        }
-
-        scanner.close();
-    }
-
     private void writeToFile() throws IOException {
         // Write a new user account to the file
         String username = usernameTextField.getText();
@@ -184,4 +178,5 @@ public class SetFTPServerDialog {
         writer.write(username + "," + password + "\n");
         writer.close();
     }
+*/
 }
