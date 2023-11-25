@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<DialogPane prefWidth="350.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.syncdroids.ui.SetFTPServerDialog">
+
+    <content>
+        <VBox prefWidth="385.0" spacing="5">
+         <children>
+            <Label text="Operating System Project.&#10;&#10;Project Name: SyncDroids
+                                                  &#10;&#10;Team Contributors:&#10;Amrutvyasa Ramasamy
+                                                  &#10;Danny Huynh
+                                                  &#10;Jason Kim
+                                                  &#10;Alan Gonzalez"
+                   textAlignment="LEFT" wrapText="true" />
+         </children>
+        </VBox>
+    </content>
+    <ButtonType fx:constant="CLOSE" />
+</DialogPane>

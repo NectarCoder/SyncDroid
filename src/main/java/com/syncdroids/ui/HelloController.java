@@ -69,6 +69,44 @@ public class HelloController {
     }
 
     @FXML
+    protected void HelpViewHelp() throws FileNotFoundException {
+        try {
+            System.out.println("Launching FTP Dialog");
+
+            // Load the FXML file for the FTP server dialog
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("set-viewhelp.fxml"));
+
+            // Create and show the dialog
+            DialogPane dialogPane = loader.load();
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setDialogPane(dialogPane);
+            dialog.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the exception
+        }
+    }
+
+    @FXML
+    protected void HelpAbout() throws FileNotFoundException {
+        try {
+            System.out.println("Launching FTP Dialog");
+
+            // Load the FXML file for the FTP server dialog
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("set-about.fxml"));
+
+            // Create and show the dialog
+            DialogPane dialogPane = loader.load();
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setDialogPane(dialogPane);
+            dialog.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the exception
+        }
+    }
+
+    @FXML
     protected void initializeLocalTreeView() throws FileNotFoundException {
         FileTree localFT = new FileTree("C:\\Users\\amrutvyasa\\Desktop\\dir1\\");
         ArrayList<FileNode> children = (ArrayList<FileNode>) localFT.getFileRoot().getChildren();
