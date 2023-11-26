@@ -15,11 +15,10 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
-
+import javafx.stage.DirectoryChooser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import javafx.stage.DirectoryChooser;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -35,12 +34,12 @@ public class HelloController {
     public MenuBar getPrimaryStage;
 
     @FXML
-    public TreeView localFolderTreeView;
+    public TreeView<String> localFolderTreeView;
     @FXML
     private TextField localFolderTextField;
 
     @FXML
-    public TreeView remoteFolderTreeView;
+    public TreeView<String> remoteFolderTreeView;
     public TextField remoteFolderTextField;
 
     @FXML
@@ -50,7 +49,7 @@ public class HelloController {
     }
 
     @FXML
-    protected void launchFTPDialog() throws FileNotFoundException {
+    protected void launchFTPDialog() {
         try {
             System.out.println("Launching FTP Dialog");
 
@@ -69,9 +68,9 @@ public class HelloController {
     }
 
     @FXML
-    protected void HelpViewHelp() throws FileNotFoundException {
+    protected void HelpViewHelp() {
         try {
-            System.out.println("Launching FTP Dialog");
+            System.out.println("Launching View Help Dialog");
 
             // Load the FXML file for the FTP server dialog
             FXMLLoader loader = new FXMLLoader(getClass().getResource("set-viewhelp.fxml"));
@@ -88,9 +87,9 @@ public class HelloController {
     }
 
     @FXML
-    protected void HelpAbout() throws FileNotFoundException {
+    protected void HelpAbout() {
         try {
-            System.out.println("Launching FTP Dialog");
+            System.out.println("Launching About Dialog");
 
             // Load the FXML file for the FTP server dialog
             FXMLLoader loader = new FXMLLoader(getClass().getResource("set-about.fxml"));
@@ -104,29 +103,6 @@ public class HelloController {
         } catch (IOException e) {
             e.printStackTrace(); // Log the exception
         }
-    }
-
-    @FXML
-    protected void initializeLocalTreeView() throws FileNotFoundException {
-        FileTree localFT = new FileTree("C:\\Users\\amrutvyasa\\Desktop\\dir1\\");
-        ArrayList<FileNode> children = (ArrayList<FileNode>) localFT.getFileRoot().getChildren();
-
-        TreeItem<String> rootItem = new TreeItem<>(localFT.getFileRoot().getFile().getName(), generateImageIcon(USE_IMAGE_FOLDER));
-        rootItem.setExpanded(true);
-
-        for (int i = 0; i < localFT.getFileRoot().getChildCount(); i++) {
-            File currentFile = children.get(i).getFile();
-            TreeItem<String> item = new TreeItem<>(currentFile.getName());
-
-            if (currentFile.isDirectory()) {
-                item.setGraphic(generateImageIcon(USE_IMAGE_FOLDER));
-            } else {
-                item.setGraphic(generateImageIcon(USE_IMAGE_FILE));
-            }
-            rootItem.getChildren().add(item);
-        }
-
-        localFolderTreeView.setRoot(rootItem);
     }
 
     private ImageView generateImageIcon(int type){
@@ -145,7 +121,6 @@ public class HelloController {
         }
     }
 
-
     @FXML
     protected void browseAction() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -154,27 +129,42 @@ public class HelloController {
         // Show open file dialog
         File selectedDirectory = directoryChooser.showDialog(null);
 
-        // If a folder is selected, update the text field
+        // If a folder is selected, update the text field and populate the tree view
         if (selectedDirectory != null) {
             localFolderTextField.setText(selectedDirectory.getAbsolutePath());
-            populateTreeView(selectedDirectory, localFolderTreeView);
+            try {
+                FileTree selectedFileTree = new FileTree(selectedDirectory.getAbsolutePath());
+                populateTreeView(selectedFileTree, localFolderTreeView);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace(); // Handle the exception appropriately, e.g., show an error message
+            }
         }
     }
+
     // Helper method to populate the TreeView with files and subdirectories
-    private void populateTreeView(File directory, TreeView<String> treeView) {
-        treeView.setRoot(createNode(directory));
+    private void populateTreeView(FileTree fileTree, TreeView<String> treeView) {
+        treeView.setRoot(createNode(fileTree));
     }
 
     // Recursive method to create a TreeItem for a given directory
-    private TreeItem<String> createNode(File file) {
-        TreeItem<String> root = new TreeItem<>(file.getName());
-        for (File subFile : file.listFiles()) {
-            if (subFile.isDirectory()) {
-                root.getChildren().add(createNode(subFile));
+    private TreeItem<String> createNode(FileTree fileTree) {
+        TreeItem<String> rootItem = new TreeItem<>(fileTree.getFileRoot().getFile().getName(), generateImageIcon(USE_IMAGE_FOLDER));
+        rootItem.setExpanded(true);
+
+        ArrayList<FileNode> children = (ArrayList<FileNode>) fileTree.getFileRoot().getChildren();
+
+        for (int i = 0; i < fileTree.getFileRoot().getChildCount(); i++) {
+            File currentFile = children.get(i).getFile();
+            TreeItem<String> item = new TreeItem<>(currentFile.getName());
+
+            if (currentFile.isDirectory()) {
+                item.setGraphic(generateImageIcon(USE_IMAGE_FOLDER));
             } else {
-                root.getChildren().add(new TreeItem<>(subFile.getName()));
+                item.setGraphic(generateImageIcon(USE_IMAGE_FILE));
             }
+            rootItem.getChildren().add(item);
         }
-        return root;
+
+        return rootItem;
     }
 }
