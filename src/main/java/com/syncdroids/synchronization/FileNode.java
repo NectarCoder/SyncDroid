@@ -5,7 +5,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -139,6 +138,14 @@ public class FileNode {
 
         return true;
     }
+
+    public FileNode getChildAt(int i) {
+        if (isDirectory && children != null && i >= 0 && i < children.size()) {
+            return children.get(i);
+        }
+        return null;
+    }
+
 
     /*
     @Override

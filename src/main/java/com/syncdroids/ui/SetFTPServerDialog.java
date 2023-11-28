@@ -8,17 +8,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.event.ActionEvent;
 import javafx.scene.text.Font;
 import java.io.BufferedWriter;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
-
 
 public class SetFTPServerDialog {
 
@@ -43,24 +39,13 @@ public class SetFTPServerDialog {
     final File file = new File("data.txt");
 
     // HashMap to store login information
-    final HashMap<String, String> loginInfo = new HashMap<>();
+    public HashMap<String, String> loginInfo = new HashMap<>();
 
     @FXML
-    private FtpClient ftpClient = new FtpClient();
+    private final FtpClient ftpClient = new FtpClient();
 
     @FXML
-    private void closeConnection() {
-        // Disconnect from FTP server before exiting the program
-        try {
-            ftpClient.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Handle disconnection exceptions appropriately
-        }
-    }
-
-    @FXML
-    void changeVisibility(ActionEvent event) {
+    void changeVisibility() {
         // Toggle visibility of password fields
         if (showPassword.isSelected()) {
             passwordTextField.setText(hiddenPasswordTextField.getText());
@@ -74,7 +59,7 @@ public class SetFTPServerDialog {
     }
 
     @FXML
-    void loginHandler(ActionEvent event) throws IOException {
+    void loginHandler() throws IOException {
         // Handle login attempt
         String username = usernameTextField.getText();
         String password = getPassword();
@@ -84,18 +69,21 @@ public class SetFTPServerDialog {
         if (password.equals(storedPassword)) {
             System.out.println("Successfully login!");
 
-            // Connect to FTP server after successful login
+            // Perform FTP operations if needed
             ftpClient.setServerAddress(serverIpTextField.getText(), Integer.parseInt(portTextField.getText()));
             ftpClient.setCredentials(username, password);
 
             try {
                 ftpClient.connect();
-                // Perform FTP operations if needed
+                // Connect to FTP server after successful login
             } catch (ServerUninitializedException | MissingCredentialsException e) {
                 e.printStackTrace();
                 // Handle exceptions appropriately
             }
 
+            writeToFile();
+
+            successField.setText(serverIpTextField.getText() + ":" + portTextField.getText());
             successField.setVisible(true);
         } else {
             errorField.setText("Wrong Password");
@@ -132,51 +120,21 @@ public class SetFTPServerDialog {
         scanner.close();
     }
 
-    /*
-    @FXML
-
-    void createAccount(ActionEvent event) throws IOException {
-
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line = reader.readLine();
-        while (line != null) {
-            String[] User = line.split(",",2);
-            if (usernameTextField.getText().equals(User[0])) {
-                System.out.println(User[0] + " already exists.");
-                errorField.setFont(new Font("Serif Bold", 12));
-                errorField.setText("User already exists");
-                errorField.setVisible(true);
-                return;
-            }
-                line = reader.readLine();
-        }
-        // Create a new user account
-        writeToFile();
-
-        // Connect to FTP server after creating an account
-        ftpClient.setServerAddress(serverIpTextField.getText(), Integer.parseInt(portTextField.getText()));
-        ftpClient.setCredentials(usernameTextField.getText(), getPassword());
-
-        try {
-            ftpClient.connect();
-            // Perform FTP operations if needed
-        } catch (ServerUninitializedException | MissingCredentialsException e) {
-            e.printStackTrace();
-            // Handle exceptions appropriately
-        }
-
-        successField.setVisible(true);
-
-
-    }
     private void writeToFile() throws IOException {
         // Write a new user account to the file
         String username = usernameTextField.getText();
         String password = getPassword();
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-        System.out.println(username+password);
+        String serverIp = serverIpTextField.getText();
+        String port = portTextField.getText();
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
+
+        // Write the username and password to the file
         writer.write(username + "," + password + "\n");
+
+        // Write the server IP and port to the file
+        writer.write(serverIp + ":" + port + "\n");
         writer.close();
+
     }
-*/
+
 }
