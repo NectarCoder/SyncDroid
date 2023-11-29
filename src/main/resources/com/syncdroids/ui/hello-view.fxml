@@ -13,10 +13,6 @@
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="835.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.syncdroids.ui.HelloController">
   <MenuBar fx:id="getPrimaryStage" layoutY="-102.0" prefHeight="135.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
     <Menu mnemonicParsing="false" text="File">
-      <MenuItem mnemonicParsing="false" text="New" />
-      <MenuItem mnemonicParsing="false" text="Open..." />
-      <MenuItem mnemonicParsing="false" text="Save" />
-      <MenuItem mnemonicParsing="false" text="Save as..." />
       <MenuItem fx:id="exit" mnemonicParsing="false" onAction="#exitProgram" text="Exit" />
     </Menu>
     <Menu mnemonicParsing="false" text="Actions">
