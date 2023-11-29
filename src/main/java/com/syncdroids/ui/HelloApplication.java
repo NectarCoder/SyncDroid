@@ -1,4 +1,3 @@
-// HelloApplication.java
 package com.syncdroids.ui;
 
 import javafx.application.Application;
@@ -10,6 +9,11 @@ import java.io.IOException;
 
 public class HelloApplication extends Application {
 
+    public static void main(String[] args) {
+        // Launch the JavaFX application
+        launch();
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
         // Load the FXML file for the main view
@@ -20,10 +24,5 @@ public class HelloApplication extends Application {
         stage.setTitle("SyncDroid");
         stage.setScene(scene);
         stage.show();
-    }
-
-    public static void main(String[] args) {
-        // Launch the JavaFX application
-        launch();
     }
 }
