@@ -136,5 +136,20 @@ public class SetFTPServerDialog {
         writer.close();
 
     }
+    @FXML
+    private void initialize() {
+        // Ensure the file exists or create it
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+                BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+                writer.write("dev,development\n");
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Handle file creation error appropriately
+            }
+        }
 
+    }
 }
