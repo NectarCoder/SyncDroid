@@ -3,9 +3,11 @@ package com.syncdroids.ui;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class HelloApplication extends Application {
 
@@ -22,6 +24,7 @@ public class HelloApplication extends Application {
 
         // Set up the main stage
         stage.setTitle("SyncDroid");
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/logo.png"))));
         stage.setScene(scene);
         stage.show();
     }

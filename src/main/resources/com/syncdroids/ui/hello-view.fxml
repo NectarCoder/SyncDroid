@@ -19,7 +19,7 @@
       <MenuItem mnemonicParsing="false" text="Synchronize" />
     </Menu>
     <Menu mnemonicParsing="false" text="Connect">
-      <MenuItem fx:id="launchFTPDialog" mnemonicParsing="false" onAction="#launchFTPDialog" text="Set FTP server" />
+      <MenuItem fx:id="launchFTPDialog" mnemonicParsing="false" onAction="#launchFTPDialog" text="Set FTP Server" />
     </Menu>
     <Menu mnemonicParsing="false" text="Help">
       <MenuItem mnemonicParsing="false" onAction="#HelpViewHelp" text="View Help" />
@@ -37,7 +37,7 @@
     <AnchorPane prefHeight="200.0" prefWidth="200.0">
       <Text layoutX="10.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" text="[Remote Folder]" />
       <TreeView fx:id="remoteFolderTreeView" layoutX="10.0" layoutY="70.0" prefHeight="272.0" prefWidth="288.0" AnchorPane.bottomAnchor="16.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" />
-      <TextField fx:id="remoteFolderTextField" layoutX="10.0" layoutY="37.0" prefHeight="31.0" prefWidth="200.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+      <TextField fx:id="remoteFolderTextField" editable="false" layoutX="10.0" layoutY="37.0" prefHeight="31.0" prefWidth="200.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
     </AnchorPane>
   </SplitPane>
 </AnchorPane>

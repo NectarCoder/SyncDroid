@@ -1,29 +1,20 @@
-// HelloController.java
 package com.syncdroids.ui;
 
+import com.syncdroids.fileengine.FtpClient;
 import com.syncdroids.synchronization.FileNode;
 import com.syncdroids.synchronization.FileTree;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.Modality;
 import javafx.stage.DirectoryChooser;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
-
 
 public class HelloController {
 
@@ -32,7 +23,6 @@ public class HelloController {
 
     @FXML
     public MenuItem exit;
-
     @FXML
     public MenuBar getPrimaryStage;
 
@@ -45,97 +35,41 @@ public class HelloController {
     public TreeView<String> remoteFolderTreeView;
     public TextField remoteFolderTextField;
 
-    @FXML
-    private boolean isSetFTPServerDialogClosed = false;
+    protected FtpClient currentFTPSession = null;
+    private SetFTPServerDialog setFTPServerDialog;
 
     @FXML
-    protected void exitProgram() {
-        // Exit the program
-        System.exit(0);
-    }
+    protected void launchFTPDialog() throws IOException {
 
-    @FXML
-    protected void launchFTPDialog() {
-        try {
-            System.out.println("Launching FTP Dialog");
+        System.out.println("Launching FTP Dialog");
 
-            // Load the FXML file for the FTP server dialog
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("set-ftpserver.fxml"));
+        // Load the FXML file for the FTP server dialog
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("set-ftpserver.fxml"));
 
-            // Create and show the dialog
-            DialogPane dialogPane = loader.load();
-            Dialog<Void> dialog = new Dialog<>();
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.setDialogPane(dialogPane);
+        // Create and show the dialog
+        DialogPane dialogPane = loader.load();
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setDialogPane(dialogPane);
+        dialog.setTitle("Set FTP Server");
+        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/logo.png"))));
+        setFTPServerDialog = loader.getController();
 
-            // Set a callback for when the dialog is closed
-            dialog.setOnCloseRequest(event -> {
-                isSetFTPServerDialogClosed = true;
+        dialog.setOnShown(event -> setFTPServerDialog.serverInfoInDataFile());
 
-                // You may perform additional actions if needed
+        // Set a callback for when the dialog is closed
+        dialog.setOnCloseRequest(event -> {
+            FtpClient temp = this.setFTPServerDialog.getFtpClient();
+            if (temp.isServerInfoSet() && temp.isServerCredentialsSet()) {
+                this.currentFTPSession = temp;
+                setRemoteFolderTextFieldServerInfo();
+            } else {
+                this.currentFTPSession = null;
+            }
+        });
 
-                // Call initialize when the dialog is closed
-                initialize();
-            });
-
-            dialog.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace(); // Log the exception
-        }
-    }
-
-    @FXML
-    protected void HelpViewHelp() {
-        try {
-            System.out.println("Launching View Help Dialog");
-
-            // Load the FXML file for the FTP server dialog
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("set-viewhelp.fxml"));
-
-            // Create and show the dialog
-            DialogPane dialogPane = loader.load();
-            Dialog<Void> dialog = new Dialog<>();
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.setDialogPane(dialogPane);
-            dialog.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace(); // Log the exception
-        }
-    }
-
-    @FXML
-    protected void HelpAbout() {
-        try {
-            System.out.println("Launching About Dialog");
-
-            // Load the FXML file for the FTP server dialog
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("set-about.fxml"));
-
-            // Create and show the dialog
-            DialogPane dialogPane = loader.load();
-            Dialog<Void> dialog = new Dialog<>();
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.setDialogPane(dialogPane);
-            dialog.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace(); // Log the exception
-        }
-    }
-
-    private ImageView generateImageIcon(int type) {
-        if (type == USE_IMAGE_FOLDER) {
-            //Create an image for folders
-            ImageView imageFolder = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/folder.png"))));
-            imageFolder.setPreserveRatio(true);
-            imageFolder.setFitWidth(16);
-            return imageFolder;
-        } else {
-            //Create an image for files
-            ImageView imageFile = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/file.png"))));
-            imageFile.setPreserveRatio(true);
-            imageFile.setFitWidth(16);
-            return imageFile;
-        }
+        dialog.showAndWait();
     }
 
     @FXML
@@ -206,42 +140,142 @@ public class HelloController {
 
         return item;
     }
-    @FXML
-    public void initialize() {
-        if (isSetFTPServerDialogClosed) {
-            try {
-                // Read the server IP and port from data.txt
-                String[] serverInfo = readServerInfoFromFile();
 
-                // Set the server IP and port in the remoteFolderTextField
-                if (serverInfo != null && serverInfo.length == 2) {
-                    remoteFolderTextField.setText(serverInfo[0] + ":" + serverInfo[1]);
-                }
-            } catch (IOException e) {
-                e.printStackTrace(); // Handle the exception appropriately
+    /**
+     * Set the data in the remote folder text field
+     */
+    @FXML
+    public void setRemoteFolderTextFieldServerInfo() {
+        try {
+            // Read the server IP and port from data.txt
+            String[] serverInfo = readServerInfoFromFile();
+
+            // Set the server IP and port in the remoteFolderTextField
+            if (serverInfo != null && serverInfo.length < 5) {
+                remoteFolderTextField.setText(serverInfo[0] + ":" + serverInfo[1]);
+            } else {
+                remoteFolderTextField.setText("");
             }
-            isSetFTPServerDialogClosed = false;
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle the exception appropriately
         }
     }
-    // Helper method to read server IP and port from data.txt
+
+    /**
+     * Helper method to read server IP and port from data.txt
+     */
     private String[] readServerInfoFromFile() throws IOException {
-        File file = new File("data.txt");
+        File file = new File("connection-data.txt");
 
         if (!file.exists()) {
             return null;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Assuming each line contains server IP and port separated by ":"
-                String[] serverInfo = line.split(":");
-                if (serverInfo.length == 2) {
-                    return serverInfo;
-                }
+        } else {
+            BufferedReader reader;
+            String data;
+            try {
+                reader = new BufferedReader(new FileReader(file));
+                data = reader.readLine();
+                reader.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
             }
+            return data.split(",");
+        }
+    }
+
+    /**
+     * Generate a ImageView that holds an appropriate image for the TreeView listing
+     *
+     * @param type Either USE_IMAGE_FOLDER or USE_IMAGE_FILE constants to indicate which icons to use in TreeView
+     * @return An ImageView with requested icon
+     */
+    private ImageView generateImageIcon(int type) {
+        if (type == USE_IMAGE_FOLDER) {
+            //Create an image for folders
+            ImageView imageFolder = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/folder.png"))));
+            imageFolder.setPreserveRatio(true);
+            imageFolder.setFitWidth(16);
+            return imageFolder;
+        } else {
+            //Create an image for files
+            ImageView imageFile = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/file.png"))));
+            imageFile.setPreserveRatio(true);
+            imageFile.setFitWidth(16);
+            return imageFile;
+        }
+    }
+
+    /**
+     * Get an initialized FtpClient object to access its connections and session
+     *
+     * @param ftpClient The FTPClient object to be set
+     */
+    protected void setCurrentFTPSession(FtpClient ftpClient) {
+        this.currentFTPSession = ftpClient;
+    }
+
+    /**
+     * Display ViewHelp Dialog
+     */
+    @FXML
+    protected void HelpViewHelp() {
+        try {
+            System.out.println("Launching View Help Dialog");
+
+            // Load the FXML file for the FTP server dialog
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("set-viewhelp.fxml"));
+
+            // Create and show the dialog
+            DialogPane dialogPane = loader.load();
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("Help");
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/logo.png"))));
+            dialog.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the exception
+        }
+    }
+
+    /**
+     * Display About Dialog
+     */
+    @FXML
+    protected void HelpAbout() {
+        try {
+            System.out.println("Launching About Dialog");
+
+            // Load the FXML file for the FTP server dialog
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("set-about.fxml"));
+
+            // Create and show the dialog
+            DialogPane dialogPane = loader.load();
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("About");
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/logo.png"))));
+            dialog.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the exception
+        }
+    }
+
+    @FXML
+    protected void exitProgram() throws IOException {
+        //close connections if any
+        if (currentFTPSession != null) {
+            currentFTPSession.disconnect();
         }
 
-        return null;
+        // Exit the program
+        System.exit(0);
     }
 }

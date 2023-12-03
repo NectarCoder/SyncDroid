@@ -2,51 +2,191 @@
 package com.syncdroids.ui;
 
 import com.syncdroids.fileengine.FtpClient;
-import com.syncdroids.fileengine.exception.MissingCredentialsException;
 import com.syncdroids.fileengine.exception.ServerUninitializedException;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Font;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Scanner;
+
+import java.io.*;
 
 public class SetFTPServerDialog {
 
-    @FXML
-    public TextField passwordTextField;
-    @FXML
-    public TextField portTextField;
+    //SERVER CONNECTION FIELDS
     @FXML
     public TextField serverIpTextField;
     @FXML
+    public TextField portTextField;
+
+    //SERVER AUTHENTICATION FIELDS
+    @FXML
     public TextField usernameTextField;
+    @FXML
+    public TextField passwordTextField;
+
+    //PASSWORD SECURITY FIELDS
     @FXML
     private CheckBox showPassword;
     @FXML
     private PasswordField hiddenPasswordTextField;
-    @FXML
-    public TextField errorField;
+
+    //SUCCESS OR ERROR FIELDS
     @FXML
     public TextField successField;
+    @FXML
+    public TextField errorField;
 
     // File to store login information
-    final File file = new File("data.txt");
+    final File file = new File("connection-data.txt");
 
-    // HashMap to store login information
-    public HashMap<String, String> loginInfo = new HashMap<>();
+    // FTP client object for establishing connection with server
+    @FXML
+    private FtpClient ftpClient = new FtpClient();
 
     @FXML
-    private final FtpClient ftpClient = new FtpClient();
+    void loginHandler() throws IOException {
 
+        //Get all the data in the fields
+        String serverIP = serverIpTextField.getText();
+        String serverPort = portTextField.getText();
+        String username = usernameTextField.getText();
+        String password = getPassword();
+
+        //Validate all the fields
+        if (serverIP == null || serverIP.isEmpty()) {
+            setErrorField("Server IP not provided!");
+        } else if (serverPort == null || serverPort.isEmpty()) {
+            setErrorField("Server port number not provided!");
+        } else if (username == null || username.isEmpty()) {
+            setErrorField("Username credential not provided!");
+        } else if (password == null || password.isEmpty()) {
+            setErrorField("Password credential not provided!");
+        } else { //Now try to connect to server with given data
+
+            this.ftpClient.setServerAddress(serverIP, Integer.parseInt(serverPort));
+            ftpClient.setCredentials(username, password);
+
+            boolean isConnectSuccessful;
+            boolean isLoginSuccessful;
+
+            try {
+                isConnectSuccessful = ftpClient.connect();
+            } catch (ServerUninitializedException e) {
+                e.printStackTrace();
+                setErrorField("Server not initialized.");
+                resetFtpClient();
+                return;
+            }
+
+            if (!isConnectSuccessful) {
+                setErrorField("Error: Server not found. Please try again.");
+                resetFtpClient();
+                return;
+            } else {
+                try {
+                    isLoginSuccessful = ftpClient.login(username, password);
+                } catch (ServerUninitializedException e) {
+                    e.printStackTrace();
+                    setErrorField("Server not initialized.");
+                    resetFtpClient();
+                    return;
+                }
+            }
+
+            if (!isLoginSuccessful) {
+                setErrorField("Error: Login credentials invalid. Please try again.");
+                resetFtpClient();
+            } else {
+                /* If the connection is successful:
+                 * - set success message for user
+                 * - write the info to file for later connecting
+                 */
+                setSuccessField("Successfully connected to the FTP server.");
+                writeToFile(new String[]{serverIP, serverPort, username, password});
+            }
+        }
+    }
+
+    protected boolean serverInfoInDataFile() {
+        if(this.file.exists()){
+            BufferedReader reader;
+            String data;
+            try {
+                reader = new BufferedReader(new FileReader(file));
+                data = reader.readLine();
+                reader.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            String[] serverInfo = data.split(",");
+            this.serverIpTextField.setText(serverInfo[0]);
+            this.portTextField.setText(serverInfo[1]);
+            this.usernameTextField.setText(serverInfo[2]);
+            this.passwordTextField.setText(serverInfo[3]);
+            this.hiddenPasswordTextField.setText(serverInfo[3]);
+
+            this.ftpClient.setServerAddress(serverInfo[0], Integer.parseInt(serverInfo[1]));
+            this.ftpClient.setCredentials(serverInfo[2], serverInfo[3]);
+
+            return true;
+        }
+        return false;
+    }
+
+    protected FtpClient getFtpClient() {
+        return this.ftpClient;
+    }
+
+    private void writeToFile(String[] info) throws IOException {
+        //Check if connection-data.txt file exists, if not create file.
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
+
+        /*
+         * Write the server IP, port, username, and password to the file (using , as delimiter)
+         * index 0 is IP, 1 is port, 2 is username, 3 is password
+         */
+        writer.write(info[0] + "," + info[1] + "," + info[2] + "," + info[3]);
+        writer.close();
+    }
+
+    // Get the visible or hidden password based on visibility
+    private String getPassword() {
+        if (showPassword.isSelected()) {
+            return passwordTextField.getText();
+        } else {
+            return hiddenPasswordTextField.getText();
+        }
+    }
+
+    private void setErrorField(String errorMessage) {
+        successField.setVisible(false);
+        errorField.setVisible(false);
+        errorField.setText(errorMessage);
+        errorField.setVisible(true);
+    }
+
+    private void setSuccessField(String successMessage) {
+        errorField.setVisible(false);
+        successField.setVisible(false);
+        successField.setText(successMessage);
+        successField.setVisible(true);
+    }
+
+    // Toggle visibility of password fields
     @FXML
-    void changeVisibility() {
-        // Toggle visibility of password fields
+    private void changeVisibility() {
         if (showPassword.isSelected()) {
             passwordTextField.setText(hiddenPasswordTextField.getText());
             passwordTextField.setVisible(true);
@@ -58,98 +198,7 @@ public class SetFTPServerDialog {
         passwordTextField.setVisible(false);
     }
 
-    @FXML
-    void loginHandler() throws IOException {
-        // Handle login attempt
-        String username = usernameTextField.getText();
-        String password = getPassword();
-        updateUsernamesAndPasswords();
-
-        String storedPassword = loginInfo.get(username);
-        if (password.equals(storedPassword)) {
-            System.out.println("Successfully login!");
-
-            // Perform FTP operations if needed
-            ftpClient.setServerAddress(serverIpTextField.getText(), Integer.parseInt(portTextField.getText()));
-            ftpClient.setCredentials(username, password);
-
-            try {
-                ftpClient.connect();
-                // Connect to FTP server after successful login
-            } catch (ServerUninitializedException | MissingCredentialsException e) {
-                e.printStackTrace();
-                // Handle exceptions appropriately
-            }
-
-            writeToFile();
-
-            successField.setText(serverIpTextField.getText() + ":" + portTextField.getText());
-            successField.setVisible(true);
-        } else {
-            errorField.setText("Wrong Password");
-            errorField.setFont(new Font("Serif Bold", 12));
-            errorField.setVisible(true);
-        }
-    }
-
-    private String getPassword() {
-        // Get the visible or hidden password based on visibility
-        if (showPassword.isSelected()) {
-            return passwordTextField.getText();
-        } else {
-            System.out.println(hiddenPasswordTextField.getText());
-            return hiddenPasswordTextField.getText();
-        }
-    }
-
-    private void updateUsernamesAndPasswords() throws IOException {
-        // Update the HashMap with login information from the file
-        Scanner scanner = new Scanner(file);
-        loginInfo.clear();
-
-        while (scanner.hasNext()) {
-            String[] splitInfo = scanner.nextLine().split(",");
-
-            if (splitInfo.length >= 2) {
-                loginInfo.put(splitInfo[0], splitInfo[1]);
-            } else {
-                System.err.println("Invalid data format in the file.");
-            }
-        }
-
-        scanner.close();
-    }
-
-    private void writeToFile() throws IOException {
-        // Write a new user account to the file
-        String username = usernameTextField.getText();
-        String password = getPassword();
-        String serverIp = serverIpTextField.getText();
-        String port = portTextField.getText();
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
-
-        // Write the username and password to the file
-        writer.write(username + "," + password + "\n");
-
-        // Write the server IP and port to the file
-        writer.write(serverIp + ":" + port + "\n");
-        writer.close();
-
-    }
-    @FXML
-    private void initialize() {
-        // Ensure the file exists or create it
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-                BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-                writer.write("dev,development\n");
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                // Handle file creation error appropriately
-            }
-        }
-
+    private void resetFtpClient(){
+        this.ftpClient = new FtpClient();
     }
 }
