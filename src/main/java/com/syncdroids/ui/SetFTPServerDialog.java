@@ -2,7 +2,7 @@
 package com.syncdroids.ui;
 
 import com.syncdroids.fileengine.FtpClient;
-import com.syncdroids.fileengine.exception.ServerUninitializedException;
+import com.syncdroids.fileengine.ServerUninitializedException;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;

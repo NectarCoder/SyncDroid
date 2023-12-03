@@ -7,6 +7,5 @@ module com.syncdroids {
 
     exports com.syncdroids.ui;
     exports com.syncdroids.fileengine;
-    exports com.syncdroids.fileengine.exception;
     opens com.syncdroids.ui to javafx.fxml, javafx.controls, com.dlsc.formsfx;
 }

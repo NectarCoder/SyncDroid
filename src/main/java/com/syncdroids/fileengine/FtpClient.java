@@ -1,7 +1,5 @@
 package com.syncdroids.fileengine;
 
-import com.syncdroids.fileengine.exception.MissingCredentialsException;
-import com.syncdroids.fileengine.exception.ServerUninitializedException;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;

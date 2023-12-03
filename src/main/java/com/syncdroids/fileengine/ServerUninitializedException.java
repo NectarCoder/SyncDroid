@@ -1,4 +1,4 @@
-package com.syncdroids.fileengine.exception;
+package com.syncdroids.fileengine;
 
 public class ServerUninitializedException extends Exception {
     public ServerUninitializedException() {
