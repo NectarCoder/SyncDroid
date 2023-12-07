@@ -11,15 +11,14 @@ import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class HelloController {
-
-    private static final int USE_IMAGE_FOLDER = 0;
-    private static final int USE_IMAGE_FILE = 1;
 
     @FXML
     public MenuItem exit;
@@ -37,6 +36,11 @@ public class HelloController {
 
     protected FtpClient currentFTPSession = null;
     private SetFTPServerDialog setFTPServerDialog;
+
+    private FileTree remoteFileTree = null;
+
+    protected ImageView imageFolder = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/folder.png")), 16, 16, false, false));
+    protected ImageView imageFile = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/file.png")), 16, 16, false, false));
 
     @FXML
     protected void launchFTPDialog() throws IOException {
@@ -64,12 +68,31 @@ public class HelloController {
             if (temp.isServerInfoSet() && temp.isServerCredentialsSet()) {
                 this.currentFTPSession = temp;
                 setRemoteFolderTextFieldServerInfo();
+                try {
+                    parseRemoteDirectory("/");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 this.currentFTPSession = null;
             }
         });
 
         dialog.showAndWait();
+    }
+
+    protected void parseRemoteDirectory(String directory) throws IOException {
+        if(this.currentFTPSession != null && currentFTPSession.isServerCredentialsSet()){
+            FTPFile[] remoteFiles = currentFTPSession.getFTPClientSessionObject().listFiles(directory);
+            for (FTPFile file : remoteFiles) {
+                if (file.isDirectory()) {
+                    System.out.println("Directory: " + directory + "/" + file.getName());
+                    parseRemoteDirectory(directory + "/" + file.getName());
+                } else {
+                    System.out.println("File: " + directory + "/" + file.getName());
+                }
+            }
+        }
     }
 
     @FXML
@@ -99,20 +122,21 @@ public class HelloController {
 
     // Recursive method to create a TreeItem for a given directory
     private TreeItem<String> createNode(FileTree fileTree) {
-        TreeItem<String> rootItem = new TreeItem<>(fileTree.getFileRoot().getFile().getName(), generateImageIcon(USE_IMAGE_FOLDER));
+        TreeItem<String> rootItem = new TreeItem<>(fileTree.getFileRoot().getFile().getName(), this.imageFolder);
         rootItem.setExpanded(true);
 
         ArrayList<FileNode> children = (ArrayList<FileNode>) fileTree.getFileRoot().getChildren();
 
         for (int i = 0; i < fileTree.getFileRoot().getChildCount(); i++) {
             FileNode currentFileNode = children.get(i);
-            File currentFile = currentFileNode.getFile();
             TreeItem<String> item = createNodeRecursive(currentFileNode);
 
-            if (currentFile.isDirectory()) {
-                item.setGraphic(generateImageIcon(USE_IMAGE_FOLDER));
+            if (currentFileNode.isDirectory()) {
+                ImageView childImage = new ImageView(this.imageFolder.getImage());
+                item.setGraphic(childImage);
             } else {
-                item.setGraphic(generateImageIcon(USE_IMAGE_FILE));
+                ImageView childImage = new ImageView(this.imageFile.getImage());
+                item.setGraphic(childImage);
             }
 
             rootItem.getChildren().add(item);
@@ -126,13 +150,14 @@ public class HelloController {
 
         for (int i = 0; i < fileNode.getChildCount(); i++) {
             FileNode currentFileNode = fileNode.getChildAt(i);
-            File currentFile = currentFileNode.getFile();
             TreeItem<String> childItem = createNodeRecursive(currentFileNode);
 
-            if (currentFile.isDirectory()) {
-                childItem.setGraphic(generateImageIcon(USE_IMAGE_FOLDER));
+            if (currentFileNode.isDirectory()) {
+                ImageView childImage = new ImageView(this.imageFolder.getImage());
+                childItem.setGraphic(childImage);
             } else {
-                childItem.setGraphic(generateImageIcon(USE_IMAGE_FILE));
+                ImageView childImage = new ImageView(this.imageFile.getImage());
+                childItem.setGraphic(childImage);
             }
 
             item.getChildren().add(childItem);
@@ -184,28 +209,6 @@ public class HelloController {
                 return null;
             }
             return data.split(",");
-        }
-    }
-
-    /**
-     * Generate a ImageView that holds an appropriate image for the TreeView listing
-     *
-     * @param type Either USE_IMAGE_FOLDER or USE_IMAGE_FILE constants to indicate which icons to use in TreeView
-     * @return An ImageView with requested icon
-     */
-    private ImageView generateImageIcon(int type) {
-        if (type == USE_IMAGE_FOLDER) {
-            //Create an image for folders
-            ImageView imageFolder = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/folder.png"))));
-            imageFolder.setPreserveRatio(true);
-            imageFolder.setFitWidth(16);
-            return imageFolder;
-        } else {
-            //Create an image for files
-            ImageView imageFile = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/file.png"))));
-            imageFile.setPreserveRatio(true);
-            imageFile.setFitWidth(16);
-            return imageFile;
         }
     }
 

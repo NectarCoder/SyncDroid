@@ -1,6 +1,7 @@
 package com.syncdroids.synchronization;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.HiddenFileFilter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,11 +10,15 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class FileNode {
 
+    /**
+     * Holds a value of -1; used to indicate if the current node doesn't have children, whether it is a directory or not.
+     */
+    private static final int NO_CHILDREN = -1;
     private boolean isDirectory;
     private List<FileNode> children = null;
     private int childCount;
@@ -50,9 +55,18 @@ public class FileNode {
         }
 
         this.isDirectory = this.currentFile.isDirectory();
-        this.childCount = (this.isDirectory) ? (Objects.requireNonNull(this.currentFile.listFiles()).length) : -1;
 
-        if (childCount != -1) {
+        File[] tempListOfChildren = this.currentFile.listFiles();
+
+        if (tempListOfChildren == null) {
+            System.err.println("**********HIT A NULL RIGHT HERE******* where the current file path is: " + this.currentFile.getAbsolutePath());
+            this.isDirectory = false;
+            this.childCount = NO_CHILDREN;
+        } else {
+            this.childCount = (this.isDirectory) ? tempListOfChildren.length : NO_CHILDREN;
+        }
+
+        if (childCount != NO_CHILDREN) {
             children = new ArrayList<>(childCount);
             populateChildren();
         }
@@ -63,16 +77,23 @@ public class FileNode {
      * Returns false if this object represents a single file and not a directory
      *
      * @return true if all sub folders and files are recognized, false if this is not a directory
-     * @throws FileNotFoundException If any children do not exist (very unlikely to happen unless another process is modifying same directory)
      */
-    public boolean populateChildren() throws FileNotFoundException {
+    public boolean populateChildren() {
         if (this.isDirectory) {
 
             File[] childrenFiles = this.currentFile.listFiles();
             for (File child : childrenFiles) {
-                children.add(new FileNode(child.getPath()));
+                FileNode fileNode;
+                try {
+                    fileNode = new FileNode(child.getPath());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                children.add(fileNode);
             }
             Arrays.sort(childrenFiles);
+            this.childCount = this.children.size();
 
             return true;
         }
