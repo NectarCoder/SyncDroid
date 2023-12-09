@@ -3,6 +3,7 @@ package com.syncdroids.ui;
 import com.syncdroids.fileengine.FtpClient;
 import com.syncdroids.synchronization.FileNode;
 import com.syncdroids.synchronization.FileTree;
+import com.syncdroids.synchronization.FtpFileNode;
 import com.syncdroids.synchronization.FtpFileTree;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class HelloController {
@@ -72,8 +74,9 @@ public class HelloController {
                 try {
                     parseRemoteDirectory("/");
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
+                startKeepAliveThread();
             } else {
                 this.currentFTPSession = null;
             }
@@ -83,11 +86,53 @@ public class HelloController {
     }
 
     public void parseRemoteDirectory(String directory) throws IOException {
-        if(this.currentFTPSession != null && currentFTPSession.isServerCredentialsSet()){
+        if (this.currentFTPSession != null && currentFTPSession.isServerCredentialsSet()) {
             FTPFile[] remoteFiles = currentFTPSession.getFTPClientSessionObject().listFiles(directory);
             FtpFileTree ftpFileRoot = new FtpFileTree(remoteFiles, currentFTPSession.getFTPClientSessionObject(), directory);
             this.remoteFileTree = ftpFileRoot;
         }
+    }
+
+    @FXML
+    public void initOrRefreshRemoteTreeView() throws IOException {
+        parseRemoteDirectory("/");
+
+        //Do stuff to display remote folder contents in TreeView
+
+    }
+
+    @FXML
+    public void synchronize() throws IOException {
+
+        if (this.localFileTree == null) {
+            // pop up msgbox saying error select local directory first
+            return;
+        } else if (this.remoteFileTree == null) {
+            // pop up msgbox saying ensure connected to ftp server and directory is parsed
+            return;
+        }
+
+        String localFileDirName = localFileTree.getFileRoot().getFile().getName();
+        List<FtpFileNode> children = this.remoteFileTree.getChildren();
+        boolean found = false;
+
+        for (FtpFileNode child : children){
+            System.err.println(child.getFileOrDirName());
+            if(child.isDirectory() && child.getFileOrDirName().equals(localFileDirName)){
+                found = true;
+                break;
+            }
+        }
+
+        if(!found){
+            currentFTPSession.getFTPClientSessionObject().makeDirectory(localFileDirName);
+        }
+
+        String syncPath = "/" + localFileDirName;
+
+        System.err.println(syncPath);
+        System.err.println(localFileDirName);
+
     }
 
     @FXML
@@ -277,4 +322,38 @@ public class HelloController {
         // Exit the program
         System.exit(0);
     }
+
+    private Thread keepAliveThread = new Thread(() -> {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                if (!this.currentFTPSession.getFTPClientSessionObject().sendNoOp()) {
+                    // Handle error
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                Thread.sleep(120000); //sleep 2 min
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    });
+
+    private void startKeepAliveThread() {
+        this.keepAliveThread.start();
+    }
+
+    private void pauseKeepAliveThread() {
+        try {
+            this.keepAliveThread.wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void resumeKeepAliveThread() {
+        this.keepAliveThread.notify();
+    }
+
 }

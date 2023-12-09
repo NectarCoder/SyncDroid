@@ -43,6 +43,10 @@ public class FtpFileTree {
         return pathSplit[pathSplit.length-1];
     }
 
+    public List<FtpFileNode> getChildren() {
+        return children;
+    }
+
     public boolean isDirectory() {
         return isDirectory;
     }
