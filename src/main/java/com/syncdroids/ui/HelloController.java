@@ -3,6 +3,7 @@ package com.syncdroids.ui;
 import com.syncdroids.fileengine.FtpClient;
 import com.syncdroids.synchronization.FileNode;
 import com.syncdroids.synchronization.FileTree;
+import com.syncdroids.synchronization.FtpFileTree;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -11,7 +12,6 @@ import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
@@ -37,7 +37,8 @@ public class HelloController {
     protected FtpClient currentFTPSession = null;
     private SetFTPServerDialog setFTPServerDialog;
 
-    private FileTree remoteFileTree = null;
+    private FileTree localFileTree = null;
+    private FtpFileTree remoteFileTree = null;
 
     protected ImageView imageFolder = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/folder.png")), 16, 16, false, false));
     protected ImageView imageFile = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icons/file.png")), 16, 16, false, false));
@@ -81,17 +82,11 @@ public class HelloController {
         dialog.showAndWait();
     }
 
-    protected void parseRemoteDirectory(String directory) throws IOException {
+    public void parseRemoteDirectory(String directory) throws IOException {
         if(this.currentFTPSession != null && currentFTPSession.isServerCredentialsSet()){
             FTPFile[] remoteFiles = currentFTPSession.getFTPClientSessionObject().listFiles(directory);
-            for (FTPFile file : remoteFiles) {
-                if (file.isDirectory()) {
-                    System.out.println("Directory: " + directory + "/" + file.getName());
-                    parseRemoteDirectory(directory + "/" + file.getName());
-                } else {
-                    System.out.println("File: " + directory + "/" + file.getName());
-                }
-            }
+            FtpFileTree ftpFileRoot = new FtpFileTree(remoteFiles, currentFTPSession.getFTPClientSessionObject(), directory);
+            this.remoteFileTree = ftpFileRoot;
         }
     }
 
@@ -118,6 +113,7 @@ public class HelloController {
     // Helper method to populate the TreeView with files and subdirectories
     private void populateTreeView(FileTree fileTree, TreeView<String> treeView) {
         treeView.setRoot(createNode(fileTree));
+        this.localFileTree = fileTree;
     }
 
     // Recursive method to create a TreeItem for a given directory
