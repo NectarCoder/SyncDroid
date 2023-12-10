@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -34,7 +35,13 @@ public class HelloController {
 
     @FXML
     public TreeView<String> remoteFolderTreeView;
+    @FXML
     public TextField remoteFolderTextField;
+
+    @FXML
+    public Text localParse;
+    @FXML
+    public Text remoteSync;
 
     protected FtpClient currentFTPSession = null;
     private SetFTPServerDialog setFTPServerDialog;
@@ -78,7 +85,7 @@ public class HelloController {
                 }
                 setRemoteFolderTextFieldServerInfo();
                 try {
-                    parseRemoteDirectory("/");
+                    populateRemoteTreeView();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -94,17 +101,65 @@ public class HelloController {
     public void parseRemoteDirectory(String directory) throws IOException {
         if (this.currentFTPSession != null && currentFTPSession.isServerCredentialsSet()) {
             FTPFile[] remoteFiles = currentFTPSession.getFTPClientSessionObject().listFiles(directory);
-            FtpFileTree ftpFileRoot = new FtpFileTree(remoteFiles, currentFTPSession.getFTPClientSessionObject(), directory);
-            this.remoteFileTree = ftpFileRoot;
+            this.remoteFileTree = new FtpFileTree(remoteFiles, currentFTPSession.getFTPClientSessionObject(), directory);
         }
     }
 
     @FXML
-    public void initOrRefreshRemoteTreeView() throws IOException {
+    public void populateRemoteTreeView() throws IOException {
+        remoteSync.setText("Reading from server, please wait...");
+        //Parse the remote directory
         parseRemoteDirectory("/");
 
-        //Do stuff to display remote folder contents in TreeView
+        //Set remote tree view
+        this.remoteFolderTreeView.setRoot(initOrRefreshRemoteTreeView(this.remoteFileTree));
+        remoteSync.setText("");
+    }
 
+    private TreeItem<String> initOrRefreshRemoteTreeView(FtpFileTree ftpFileTree) {
+
+        TreeItem<String> rootItem = new TreeItem<>("/", new ImageView(this.imageFolder.getImage()));
+        rootItem.setExpanded(true);
+
+        List<FtpFileNode> children = this.remoteFileTree.getChildren();
+
+        for (int i = 0; i < children.size(); i++) {
+            FtpFileNode currentFileNode = children.get(i);
+            TreeItem<String> item = initOrRefreshRemoteTreeViewRecursive(currentFileNode);
+
+            if (currentFileNode.isDirectory()) {
+                ImageView childImage = new ImageView(this.imageFolder.getImage());
+                item.setGraphic(childImage);
+            } else {
+                ImageView childImage = new ImageView(this.imageFile.getImage());
+                item.setGraphic(childImage);
+            }
+
+            rootItem.getChildren().add(item);
+        }
+
+        return rootItem;
+    }
+
+    private TreeItem<String> initOrRefreshRemoteTreeViewRecursive(FtpFileNode fileNode) {
+        TreeItem<String> item = new TreeItem<>(fileNode.getFileOrDirName());
+
+        for (int i = 0; i < fileNode.getChildCount(); i++) {
+            FtpFileNode currentFileNode = fileNode.getChildAt(i);
+            TreeItem<String> childItem = initOrRefreshRemoteTreeViewRecursive(currentFileNode);
+
+            if (currentFileNode.isDirectory()) {
+                ImageView childImage = new ImageView(this.imageFolder.getImage());
+                childItem.setGraphic(childImage);
+            } else {
+                ImageView childImage = new ImageView(this.imageFile.getImage());
+                childItem.setGraphic(childImage);
+            }
+
+            item.getChildren().add(childItem);
+        }
+
+        return item;
     }
 
     @FXML
@@ -112,9 +167,17 @@ public class HelloController {
 
         if (this.localFileTree == null) {
             // pop up msgbox saying error select local directory first
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setHeaderText("Please Select a Local Directory");
+            errorAlert.setContentText("Please select a directory to sync to server before attempting to synchronize!");
+            errorAlert.showAndWait();
             return;
         } else if (this.remoteFileTree == null) {
             // pop up msgbox saying ensure connected to ftp server and directory is parsed
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setHeaderText("Please Connect to Server");
+            errorAlert.setContentText("Please ensure you are connected to the FTP server and refreshed the remote view before attempting to synchronize!");
+            errorAlert.showAndWait();
             return;
         }
 
@@ -140,7 +203,7 @@ public class HelloController {
         System.err.println(localFileDirName);
 
         compareEntriesAndTransfer(syncPath, this.localFileTree.getFileRoot());
-
+        populateRemoteTreeView();
     }
 
     private void compareEntriesAndTransfer(String remoteSyncPath, FileNode fileNode) throws IOException {
@@ -169,7 +232,7 @@ public class HelloController {
                             // do transfer
                             try {
                                 session.storeFile(remotePathName, new FileInputStream(currentFile.getFile()));
-                            } catch (Exception e){
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             System.err.println("MODIFIED TIME DO TRANSFER");
@@ -190,7 +253,7 @@ public class HelloController {
                     System.err.println("NOT FOUND IS FILE DO TRANSFER");
                     try {
                         session.storeFile(remotePathName, new FileInputStream(currentFile.getFile()));
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -210,23 +273,26 @@ public class HelloController {
         if (selectedDirectory != null) {
             localFolderTextField.setText(selectedDirectory.getAbsolutePath());
             try {
+                localParse.setText("Parsing local directory, please wait...");
                 FileTree selectedFileTree = new FileTree(selectedDirectory.getAbsolutePath());
-                populateTreeView(selectedFileTree, localFolderTreeView);
+                populateLocalTreeView(selectedFileTree, localFolderTreeView);
             } catch (FileNotFoundException e) {
                 e.printStackTrace(); // Handle the exception appropriately, e.g., show an error message
+            } finally {
+                localParse.setText("");
             }
         }
     }
 
     // Helper method to populate the TreeView with files and subdirectories
-    private void populateTreeView(FileTree fileTree, TreeView<String> treeView) {
+    private void populateLocalTreeView(FileTree fileTree, TreeView<String> treeView) {
         treeView.setRoot(createNode(fileTree));
         this.localFileTree = fileTree;
     }
 
     // Recursive method to create a TreeItem for a given directory
     private TreeItem<String> createNode(FileTree fileTree) {
-        TreeItem<String> rootItem = new TreeItem<>(fileTree.getFileRoot().getFile().getName(), this.imageFolder);
+        TreeItem<String> rootItem = new TreeItem<>(fileTree.getFileRoot().getFile().getName(), new ImageView(this.imageFolder.getImage()));
         rootItem.setExpanded(true);
 
         ArrayList<FileNode> children = (ArrayList<FileNode>) fileTree.getFileRoot().getChildren();

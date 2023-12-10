@@ -33,12 +33,14 @@
       <TreeView fx:id="localFolderTreeView" layoutX="8.0" layoutY="78.0" onKeyPressed="#browseAction" prefHeight="272.0" prefWidth="288.0" AnchorPane.bottomAnchor="16.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" />
       <TextField fx:id="localFolderTextField" layoutX="8.0" layoutY="38.0" prefHeight="31.0" prefWidth="357.0" />
       <Button layoutX="370.0" layoutY="41.0" mnemonicParsing="false" onAction="#browseAction" prefHeight="25.0" prefWidth="31.0" text="..." AnchorPane.rightAnchor="4.0" />
+         <Text fx:id="localParse" fill="RED" layoutX="137.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="184.07421875" />
     </AnchorPane>
     <AnchorPane prefHeight="200.0" prefWidth="200.0">
       <Text layoutX="10.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" text="[Remote Folder]" />
       <TreeView fx:id="remoteFolderTreeView" layoutX="10.0" layoutY="70.0" prefHeight="272.0" prefWidth="288.0" AnchorPane.bottomAnchor="16.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" />
       <TextField fx:id="remoteFolderTextField" editable="false" layoutX="10.0" layoutY="37.0" prefHeight="31.0" prefWidth="200.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
-         <Button layoutX="343.0" layoutY="8.0" mnemonicParsing="false" onAction="#initOrRefreshRemoteTreeView" text="Refresh" />
+         <Button layoutX="343.0" layoutY="8.0" mnemonicParsing="false" onAction="#populateRemoteTreeView" text="Refresh" />
+         <Text fx:id="remoteSync" fill="RED" layoutX="151.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="184.07421875" />
     </AnchorPane>
   </SplitPane>
 </AnchorPane>

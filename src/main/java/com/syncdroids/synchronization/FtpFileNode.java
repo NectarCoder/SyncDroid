@@ -44,6 +44,17 @@ public class FtpFileNode {
         return fullNixPath;
     }
 
+    public int getChildCount(){
+        return this.childCount;
+    }
+
+    public FtpFileNode getChildAt(int i) {
+        if (isDirectory && children != null && i >= 0 && i < children.size()) {
+            return children.get(i);
+        }
+        return null;
+    }
+
     public boolean isDirectory() {
         return isDirectory;
     }
