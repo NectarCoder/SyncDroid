@@ -40,3 +40,8 @@ build/
 
 ### Other ###
 /connection-data.txt
+
+### Apache FTP Server files ###
+/apache-ftpserver-1.2.0/res/synced_folder/*
+/apache-ftpserver-1.2.0/res/log/*
+/apache-ftpserver-1.2.0/res/home/*
