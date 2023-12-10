@@ -1,10 +1,7 @@
 package com.syncdroids.ui;
 
 import com.syncdroids.fileengine.FtpClient;
-import com.syncdroids.synchronization.FileNode;
-import com.syncdroids.synchronization.FileTree;
-import com.syncdroids.synchronization.FtpFileNode;
-import com.syncdroids.synchronization.FtpFileTree;
+import com.syncdroids.synchronization.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -13,10 +10,13 @@ import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -70,6 +70,12 @@ public class HelloController {
             FtpClient temp = this.setFTPServerDialog.getFtpClient();
             if (temp.isServerInfoSet() && temp.isServerCredentialsSet()) {
                 this.currentFTPSession = temp;
+                this.currentFTPSession.setBufferSize(Integer.MAX_VALUE / 8);
+                try {
+                    this.currentFTPSession.setFileType(FtpClient.BINARY_TYPE);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 setRemoteFolderTextFieldServerInfo();
                 try {
                     parseRemoteDirectory("/");
@@ -116,15 +122,15 @@ public class HelloController {
         List<FtpFileNode> children = this.remoteFileTree.getChildren();
         boolean found = false;
 
-        for (FtpFileNode child : children){
+        for (FtpFileNode child : children) {
             System.err.println(child.getFileOrDirName());
-            if(child.isDirectory() && child.getFileOrDirName().equals(localFileDirName)){
+            if (child.isDirectory() && child.getFileOrDirName().equals(localFileDirName)) {
                 found = true;
                 break;
             }
         }
 
-        if(!found){
+        if (!found) {
             currentFTPSession.getFTPClientSessionObject().makeDirectory(localFileDirName);
         }
 
@@ -133,6 +139,63 @@ public class HelloController {
         System.err.println(syncPath);
         System.err.println(localFileDirName);
 
+        compareEntriesAndTransfer(syncPath, this.localFileTree.getFileRoot());
+
+    }
+
+    private void compareEntriesAndTransfer(String remoteSyncPath, FileNode fileNode) throws IOException {
+        System.err.println("INSIDE COMPARE METHOD");
+        FTPClient session = this.currentFTPSession.getFTPClientSessionObject();
+
+        FTPFileComparator comparator = new FTPFileComparator();
+        FTPFile[] ftpFiles = session.listFiles(remoteSyncPath);
+        Arrays.sort(ftpFiles, comparator);
+
+        List<FileNode> localFiles = fileNode.getChildren();
+        int i;
+        boolean found = false;
+        for (i = 0; i < localFiles.size(); i++) {
+            FileNode currentFile = localFiles.get(i);
+            for (FTPFile ftpFile : ftpFiles) {
+                if (currentFile.getFile().getName().equals(ftpFile.getName())) {
+                    found = true;
+                    if (currentFile.isDirectory() && ftpFile.isDirectory()) {
+                        compareEntriesAndTransfer(remoteSyncPath + "/" + currentFile.getFile().getName(), currentFile);
+                    } else {
+                        String remotePathName = remoteSyncPath + "/" + ftpFile.getName();
+                        Instant localLastModifiedTime = Instant.ofEpochMilli(currentFile.getFile().lastModified());
+                        Instant remoteLastModifiedTime = session.mdtmInstant(remotePathName);
+                        if (localLastModifiedTime.isAfter(remoteLastModifiedTime)) {
+                            // do transfer
+                            try {
+                                session.storeFile(remotePathName, new FileInputStream(currentFile.getFile()));
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+                            System.err.println("MODIFIED TIME DO TRANSFER");
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!found) {
+                String remotePathName = remoteSyncPath + "/" + currentFile.getFile().getName();
+                if (currentFile.isDirectory()) {
+                    System.err.println("NOT FOUND IS DIR MAKE DIR");
+                    //make dir here
+                    session.makeDirectory(remotePathName);
+                    compareEntriesAndTransfer(remotePathName, currentFile);
+                } else {
+                    // do transfer
+                    System.err.println("NOT FOUND IS FILE DO TRANSFER");
+                    try {
+                        session.storeFile(remotePathName, new FileInputStream(currentFile.getFile()));
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     @FXML
@@ -319,6 +382,9 @@ public class HelloController {
             currentFTPSession.disconnect();
         }
 
+        //close keepAlive thread if applicable
+        stopKeepAliveThread();
+
         // Exit the program
         System.exit(0);
     }
@@ -354,6 +420,12 @@ public class HelloController {
 
     private void resumeKeepAliveThread() {
         this.keepAliveThread.notify();
+    }
+
+    private void stopKeepAliveThread() {
+        if (this.keepAliveThread != null) {
+            this.keepAliveThread.interrupt();
+        }
     }
 
 }

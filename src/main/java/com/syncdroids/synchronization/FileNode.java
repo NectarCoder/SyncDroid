@@ -1,7 +1,6 @@
 package com.syncdroids.synchronization;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.HiddenFileFilter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,7 +9,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class FileNode {
@@ -82,6 +80,8 @@ public class FileNode {
         if (this.isDirectory) {
 
             File[] childrenFiles = this.currentFile.listFiles();
+            FileComparator comparator = new FileComparator();
+            Arrays.sort(childrenFiles, comparator);
             for (File child : childrenFiles) {
                 FileNode fileNode;
                 try {
@@ -92,7 +92,6 @@ public class FileNode {
                 }
                 children.add(fileNode);
             }
-            Arrays.sort(childrenFiles);
             this.childCount = this.children.size();
 
             return true;
@@ -166,58 +165,4 @@ public class FileNode {
         }
         return null;
     }
-
-
-    /*
-    @Override
-    public int compareTo(FileNode other) {
-
-        //Check if both are directories
-        if (this.isDirectory && other.isDirectory) {
-
-            //Check which directory has more children in it
-            if (this.childCount > other.childCount) {
-                return 1;
-            } else if (this.childCount < other.childCount) {
-                return -1;
-            } else {
-
-            }
-        } else { // Either one or both are files
-
-            //See if current or the other or neither are directories
-            if (this.isDirectory) {
-                return 1;
-            } else if (other.isDirectory) {
-                return -1;
-            } else {
-
-                //Compare file sizes
-                if (this.currentFile.getTotalSpace() > other.currentFile.getTotalSpace()) {
-                    return 1;
-                } else if (this.currentFile.getTotalSpace() < other.currentFile.getTotalSpace()) {
-                    return -1;
-                } else {
-                    boolean dataEquals = false;
-                    try {
-                        dataEquals = FileUtils.contentEquals(this.currentFile, other.getFile());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (dataEquals){
-                        return 0;
-                    }
-                    else {
-                        return 1;
-                    }
-
-                }
-            }
-        }
-
-
-        return 0;
-    }
-     */
 }

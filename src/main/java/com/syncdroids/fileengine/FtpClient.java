@@ -15,6 +15,9 @@ public class FtpClient {
     private Integer port;
     private FTPClient ftpClient;
 
+    public static final int BINARY_TYPE = 0;
+    public static final int ASCII_TYPE = 1;
+
     /**
      * Initializes a new FtpClient object.
      * Before using this class, set the server address and credentials with the setServerAddress() and setCredentials() methods.
@@ -144,6 +147,30 @@ public class FtpClient {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Set the internal buffer size for buffered data streams.
+     * @param bufferSize The size of the buffer. Use a non-positive value to use the default.
+     */
+    public void setBufferSize(int bufferSize) {
+        this.ftpClient.setBufferSize(bufferSize);
+    }
+
+    /**
+     * Retrieve the current internal buffer size for buffered data streams.
+     * @return The current buffer size.
+     */
+    public int getBufferSize(){
+        return this.ftpClient.getBufferSize();
+    }
+
+    public void setFileType(int mode) throws IOException {
+        if(mode == BINARY_TYPE){
+            this.ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+        } else {
+            this.ftpClient.setFileType(FTPClient.ASCII_FILE_TYPE);
+        }
     }
 
     @Override
