@@ -3,11 +3,6 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### Apache ftpserver ###
-apache-ftpserver-1.2.0/res/log/*
-apache-ftpserver-1.2.0/res/home/*
-apache-ftpserver-1.2.0/res/synced_folder/*
-
 ### IntelliJ IDEA ###
 .idea/
 .idea/modules.xml
@@ -45,3 +40,6 @@ build/
 
 ### Other ###
 /connection-data.txt
+/apache-ftpserver-1.2.0/res/synced_folder/
+/apache-ftpserver-1.2.0/res/log/
+/apache-ftpserver-1.2.0/res/home/
