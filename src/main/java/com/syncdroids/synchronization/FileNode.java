@@ -71,7 +71,7 @@ public class FileNode {
     }
 
     /**
-     * Populate all children of the directory represented byt his object
+     * Populate all children of the directory represented by this object
      * Returns false if this object represents a single file and not a directory
      *
      * @return true if all sub folders and files are recognized, false if this is not a directory

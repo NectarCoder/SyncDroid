@@ -41,11 +41,25 @@ public class FtpClient {
         this.port = portNumber;
     }
 
+    /**
+     *
+     * Set credentials for this client instance.
+     *
+     * @param username Username
+     * @param password Password
+     */
     public void setCredentials(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
+    /**
+     *
+     * Connect to the requested server.
+     *
+     * @return True if connection was successful, or False if unsuccessful.
+     * @throws ServerUninitializedException If server information has not been set.
+     */
     public boolean connect() throws ServerUninitializedException {
         if ((serverip == null || port == null) || (serverip.isEmpty())) {
             throw new ServerUninitializedException();
@@ -135,6 +149,12 @@ public class FtpClient {
         return this.ftpClient;
     }
 
+    /**
+     *
+     * Check if the server information (IP & Port Number) has been set.
+     *
+     * @return True if information set, or False if empty.
+     */
     public boolean isServerInfoSet() {
         if (this.serverip != null && !this.serverip.isEmpty() && this.port != null) {
             return true;
@@ -142,6 +162,12 @@ public class FtpClient {
         return false;
     }
 
+    /**
+     *
+     * Check if the credentials to connect to the server has been set.
+     *
+     * @return True if username/password is set, or False if empty.
+     */
     public boolean isServerCredentialsSet() {
         if (this.username != null && !this.username.isEmpty() && this.password != null && !this.password.isEmpty()) {
             return true;
@@ -173,6 +199,12 @@ public class FtpClient {
         }
     }
 
+    /**
+     *
+     * Plaintext print of server connection information.
+     *
+     * @return String of IP, port, username, password.
+     */
     @Override
     public String toString() {
         String result = (this.serverip != null) ? this.serverip : "serverip null ";
