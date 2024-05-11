@@ -6,8 +6,8 @@ Note: This project is developed with IntelliJ IDEA.
 
 ## Installation  
 
-Download latest release from (link to latest release), and ensure you have followed the instructions in the [Prerequisites](#prerequisites) section below.  
-Refer to the Wiki for usage.
+No releases have been published - as of right now you will have to build the application from source (See [Build](#build)).  
+Refer to the Wiki for usage.  
 
 ## Build  
 
@@ -27,7 +27,7 @@ There are two methods by which the application can be built.
   - Run `mvn javafx:run` to launch application.
  
 #### JAR generation
-Run `mvn compile package`. Use the one ending with `-shaded.jar` for the completly bundled and double-clickable JAR.
+Run `mvn compile package`. Use the one ending with `-shaded.jar` for the completely bundled and double-clickable JAR.
 
 ## Prerequisites  
 
